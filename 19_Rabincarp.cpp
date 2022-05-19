@@ -1,55 +1,53 @@
-#include <bits/stdc++.h>
+// Rabin-Karp algorithm in C++
+
+#include <string.h>
+
+#include <iostream>
 using namespace std;
 
-long long binpow(long long a, long long b) {
-    if (b == 0)
-        return 1;
-    long long res = binpow(a, b / 2);
-    if (b % 2)
-        return res * res * a;
-    else
-        return res * res;
+#define d 10
+
+void rabinKarp(char pattern[], char text[], int q) {
+  int m = strlen(pattern);
+  int n = strlen(text);
+  int i, j;
+  int p = 0;
+  int t = 0;
+  int h = 1;
+
+  for (i = 0; i < m - 1; i++)
+    h = (h * d) % q;
+
+  // Calculate hash value for pattern and text
+  for (i = 0; i < m; i++) {
+    p = (d * p + pattern[i]) % q;
+    t = (d * t + text[i]) % q;
+  }
+
+  // Find the match
+  for (i = 0; i <= n - m; i++) {
+    if (p == t) {
+      for (j = 0; j < m; j++) {
+        if (text[i + j] != pattern[j])
+          break;
+      }
+
+      if (j == m)
+        cout << "Pattern is found at position: " << i + 1 << endl;
+    }
+
+    if (i < n - m) {
+      t = (d * (t - text[i] * h) + text[i + m]) % q;
+
+      if (t < 0)
+        t = (t + q);
+    }
+  }
 }
 
-int main(){
-    string s,t;
-    cin>>s>>t;
-    string S = "abcdefghijklmnopqrstuvwxyz";
-    map<char,int> M;
-    for(int i=0;i<S.size();i++){
-         M[S[i]] = i+1;
-    }
-    int n = s.size();
-    int m = t.size();
-    int phash = 0;
-    vector<int> strhash(n,0);
-    for(int i=0;i<m;i++){
-        phash += M[t[i]]*binpow(10,(m-1)-i);
-        strhash[0] += M[s[i]]*binpow(10,(m-1)-i);
-    }
-    cout<<phash<<endl;
-    vector<int> match;
-    for(int i=0;i<n;i++){
-         if(i!=0){
-              strhash[i] = (strhash[i-1] - M[s[i-1]]*binpow(10,m-1))*10 + M[s[(m-1)+i]];
-         }
-        cout<<strhash[i]<<endl;
-         if(strhash[i] == phash){
-               int f = 1;
-               for(int j=0;j<m;j++){
-                    if(s[j+i] != t[j]){
-                         f=0;
-                         break;
-                    }
-               }
-               if(f==1){
-                    match.push_back(i);
-               }
-         }
-    }
-    cout<<match.size();
-    for(int x : match){
-        cout<<x<<" ";
-    }
-    return 0;
+int main() {
+  char text[] = "ABCCDDAEFG";
+  char pattern[] = "CDD";
+  int q = 13;
+  rabinKarp(pattern, text, q);
 }
